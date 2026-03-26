@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Student Attendance System</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #f4f6f8;
+        text-align: center;
+        margin: 0;
+        padding: 0;
+    }
+    header {
+        background: #4CAF50;
+        color: white;
+        padding: 15px;
+        font-size: 24px;
+    }
+    .container {
+        padding: 20px;
+    }
+    input {
+        padding: 8px;
+        width: 200px;
+        margin: 10px;
+    }
+    button {
+        padding: 8px 12px;
+        margin: 5px;
+        cursor: pointer;
+        border: none;
+        background: #4CAF50;
+        color: white;
+        border-radius: 5px;
+    }
+    button:hover {
+        background: #45a049;
+    }
+    table {
+        margin: 20px auto;
+        border-collapse: collapse;
+        width: 80%;
+        background: white;
+    }
+    th, td {
+        padding: 10px;
+        border: 1px solid #ddd;
+    }
+    th {
+        background: #4CAF50;
+        color: white;
+    }
+    .present {
+        color: green;
+        font-weight: bold;
+    }
+    .absent {
+        color: red;
+        font-weight: bold;
+    }
+</style>
+</head>
+<body>
+
+<header>Student Attendance Management</header>
+
+<div class="container">
+
+    <input type="text" id="studentName" placeholder="Enter student name">
+    <button onclick="addStudent()">Add Student</button>
+
+    <h3>Mark Attendance</h3>
+    <div id="attendanceList"></div>
+
+    <h3>Attendance Records</h3>
+    <table id="recordTable">
+        <thead>
+            <tr>
+                <th>Student</th>
+                <th>Date</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+</div>
+
+<script>
+let students = JSON.parse(localStorage.getItem("students")) || [];
+let records = JSON.parse(localStorage.getItem("records")) || [];
+
+function saveData() {
+    localStorage.setItem("students", JSON.stringify(students));
+    localStorage.setItem("records", JSON.stringify(records));
+}
+
+function addStudent() {
+    let name = document.getElementById("studentName").value.trim();
+    if (name && !students.includes(name)) {
+        students.push(name);
+        saveData();
+        displayAttendance();
+        document.getElementById("studentName").value = "";
+    } else {
+        alert("Invalid or duplicate name!");
+    }
+}
+
+function displayAttendance() {
+    let container = document.getElementById("attendanceList");
+    container.innerHTML = "";
+
+    students.forEach(student => {
+        let div = document.createElement("div");
+        div.innerHTML = `
+            ${student}
+            <button onclick="mark('${student}', 'Present')">Present</button>
+            <button onclick="mark('${student}', 'Absent')">Absent</button>
+        `;
+        container.appendChild(div);
+    });
+}
+
+function mark(student, status) {
+    let today = new Date().toLocaleDateString();
+    records.push({ student, date: today, status });
+    saveData();
+    displayRecords();
+}
+
+function displayRecords() {
+    let tbody = document.querySelector("#recordTable tbody");
+    tbody.innerHTML = "";
+
+    records.forEach(r => {
+        let row = `<tr>
+            <td>${r.student}</td>
+            <td>${r.date}</td>
+            <td class="${r.status === 'Present' ? 'present' : 'absent'}">${r.status}</td>
+        </tr>`;
+        tbody.innerHTML += row;
+    });
+}
+
+// Initialize
+displayAttendance();
+displayRecords();
+</script>
+
+</body>
+</html>
